@@ -1,10 +1,11 @@
-import {Form, Formik, useField} from 'formik'
+import {Form, Formik} from 'formik'
 import React, {useState} from 'react'
-import NumberFormat, {NumberFormatProps} from 'react-number-format';
 import * as yup from 'yup';
 import {SchemaOf} from 'yup';
-import {FieldAttributes} from "formik/dist/Field";
-import {initialValues} from "./initialValues";
+import {initializeValueToSchema} from "../initializeValueToSchema";
+import {Submit} from "../components/Submit";
+import {TextInput} from "../components/TextInput";
+import {NumberField} from "../components/NumberField";
 
 interface Person {
     firstName?: string
@@ -30,13 +31,13 @@ export default function Home() {
         setData(values);
     }
 
-    const iv = initialValues(data, schema);
+    const initialValue = initializeValueToSchema(data, schema);
 
     return (
         <div>
             <main className="flex-col flex items-center justify-center min-h-screen container mx-auto">
                 <Formik
-                    initialValues={iv}
+                    initialValues={initialValue}
                     onSubmit={handleSubmit}
                     validationSchema={schema}
                 >
@@ -52,12 +53,7 @@ export default function Home() {
                         <NumberField label="Phone" type="tel" name="phone" format="(###) ###-####" mask="_"/>
                         <NumberField label="Amount" name="amount"/>
                         <NumberField label="Another Field" name="anotherField"/>
-                        <button
-                            type="submit"
-                            className="px-4 py-1 rounded bg-blue-500 text-white font-bold col-span-2"
-                        >
-                            Submit
-                        </button>
+                        <Submit/>
                     </Form>
                 </Formik>
                 <br/>
@@ -67,41 +63,3 @@ export default function Home() {
     )
 }
 
-interface TextInputProps extends FieldAttributes<any> {
-    label: string
-}
-
-function TextInput({label, name, ...props}: TextInputProps) {
-    const [field, meta] = useField(name);
-    return (
-        <label className="flex flex-col space-y-1">
-            <div>{label}</div>
-            <input {...props} {...field}/>
-            <p className="text-red-500 text-sm">{meta.touched && meta.error ? meta.error : <span>&nbsp;</span>}</p>
-        </label>
-    )
-}
-
-interface MyNumberInputProps extends NumberFormatProps {
-    label: string
-}
-
-function NumberField({label, name, ...props}: MyNumberInputProps) {
-    // @ts-ignore
-    const [field, meta, helpers] = useField(name);
-    return (
-        <label className="flex flex-col space-y-1">
-            <div>{label}</div>
-            <NumberFormat
-                thousandSeparator
-                name={name}
-                onValueChange={values => helpers.setValue(values.floatValue)}
-                onChange={() => helpers.setTouched(true)}
-                onBlur={() => helpers.setTouched(true)}
-                value={field.value}
-                {...props}
-            />
-            <p className="text-red-500 text-sm">{meta.touched && meta.error ? meta.error : <span>&nbsp;</span>}</p>
-        </label>
-    )
-}
